@@ -97,9 +97,6 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v1
 
-      - name: Unshallow
-        run: git fetch --prune --unshallow
-
       - name: Vars
         id: vars
         run: |
