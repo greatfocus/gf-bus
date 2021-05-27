@@ -80,12 +80,13 @@ func (client *Client) SubscribeOnce(topic string, fn interface{}, serverAddr, se
 // Start - starts the client service to listen to remote events
 func (client *Client) Start() error {
 	var err error
+	var l net.Listener
 	service := client.service
 	if !service.started {
 		server := rpc.NewServer()
 		server.Register(service)
 		server.HandleHTTP(client.path, "/debug"+client.path)
-		l, err := net.Listen("tcp", client.address)
+		l, err = net.Listen("tcp", client.address)
 		if err == nil {
 			service.wg.Add(1)
 			service.started = true
