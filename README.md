@@ -1,41 +1,39 @@
-EventBus
+gfbus
 ======
 
-[![GoDoc](https://godoc.org/github.com/asaskevich/EventBus?status.svg)](https://godoc.org/github.com/asaskevich/EventBus) [![Coverage Status](https://img.shields.io/coveralls/asaskevich/EventBus.svg)](https://coveralls.io/r/asaskevich/EventBus?branch=master) [![Build Status](https://travis-ci.org/asaskevich/EventBus.svg)](https://travis-ci.org/asaskevich/EventBus)
-
-Package EventBus is the little and lightweight eventbus with async compatibility for GoLang.
+Package gfbus is the little and lightweight gfbus with async compatibility for GoLang.
 
 #### Installation
 Make sure that Go is installed on your computer.
 Type the following command in your terminal:
 
-	go get github.com/asaskevich/EventBus
+	go get github.com/greatfocus/gfbus
 
 After it the package is ready to use.
 
 #### Import package in your project
 Add following line in your `*.go` file:
 ```go
-import "github.com/asaskevich/EventBus"
+import "github.com/greatfocus/gfbus"
 ```
-If you unhappy to use long `EventBus`, you can do something like this:
+If you unhappy to use long `gfbus`, you can do something like this:
 ```go
 import (
-	evbus "github.com/asaskevich/EventBus"
+	evbus "github.com/greatfocus/gfbus"
 )
 ```
 
 #### Example
 ```go
-func calculator(a int, b int) {
-	fmt.Printf("%d\n", a + b)
+func customerFetch(id int) {
+	fmt.Printf("Customer %d\n", id)
 }
 
 func main() {
-	bus := EventBus.New();
-	bus.Subscribe("main:calculator", calculator);
-	bus.Publish("main:calculator", 20, 40);
-	bus.Unsubscribe("main:calculator", calculator);
+	bus := gfbus.New();
+	bus.Subscribe("customer:fetch", customerFetch);
+	bus.Publish("customer:fetch", 20, 40);
+	bus.Unsubscribe("customer:fetch", customerFetch);
 }
 ```
 
@@ -51,9 +49,9 @@ func main() {
 * **WaitAsync()**
 
 #### New()
-New returns new EventBus with empty handlers.
+New returns new gfbus with empty handlers.
 ```go
-bus := EventBus.New();
+bus := gfbus.New();
 ```
 
 #### Subscribe(topic string, fn interface{}) error
@@ -99,7 +97,7 @@ func slowCalculator(a, b int) {
 	fmt.Printf("%d\n", a + b)
 }
 
-bus := EventBus.New()
+bus := gfbus.New()
 bus.SubscribeAsync("main:slow_calculator", slowCalculator, false)
 
 bus.Publish("main:slow_calculator", 20, 60)
@@ -130,7 +128,7 @@ func main() {
     server := NewServer(":2010", "/_server_bus_", New())
     server.Start()
     // ...
-    server.EventBus().Publish("main:calculator", 4, 6)
+    server.gfbus().Publish("customer:fetch", 4, 6)
     // ...
     server.Stop()
 }
@@ -141,22 +139,8 @@ client.go
 func main() {
     client := NewClient(":2015", "/_client_bus_", New())
     client.Start()
-    client.Subscribe("main:calculator", calculator, ":2010", "/_server_bus_")
+    client.Subscribe("customer:fetch", customerFetch, ":2010", "/_server_bus_")
     // ...
     client.Stop()
 }
 ```
-
-#### Notes
-Documentation is available here: [godoc.org](https://godoc.org/github.com/asaskevich/EventBus).
-Full information about code coverage is also available here: [EventBus on gocover.io](http://gocover.io/github.com/asaskevich/EventBus).
-
-#### Support
-If you do have a contribution for the package feel free to put up a Pull Request or open Issue.
-
-#### Special thanks to [contributors](https://github.com/asaskevich/EventBus/graphs/contributors)
-* [Brian Downs](https://github.com/briandowns)
-* [Dominik Schulz](https://github.com/gittex)
-* [bennAH](https://github.com/bennAH)
-* [John Noble] (https://github.com/gaxunil)
-* [Evan Borgstrom] (https://github.com/borgstrom)
