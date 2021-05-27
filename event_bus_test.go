@@ -1,4 +1,4 @@
-package EventBus
+package gfbus
 
 import (
 	"testing"
@@ -48,7 +48,7 @@ func TestSubscribeOnceAndManySubscribe(t *testing.T) {
 	bus := New()
 	event := "topic"
 	flag := 0
-	fn := func() { flag += 1 }
+	fn := func() { flag++ }
 	bus.SubscribeOnce(event, fn)
 	bus.Subscribe(event, fn)
 	bus.Subscribe(event, fn)
@@ -173,7 +173,7 @@ func TestSubscribeAsync(t *testing.T) {
 	numResults := 0
 
 	go func() {
-		for _ = range results {
+		for range results {
 			numResults++
 		}
 	}()

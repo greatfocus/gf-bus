@@ -1,8 +1,9 @@
-package EventBus
+package gfbus
 
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"net/rpc"
@@ -51,19 +52,19 @@ func (client *Client) doSubscribe(topic string, fn interface{}, serverAddr, serv
 	}()
 
 	rpcClient, err := rpc.DialHTTPPath("tcp", serverAddr, serverPath)
-	defer rpcClient.Close()
 	if err != nil {
-		fmt.Errorf("dialing: %v", err)
+		log.Printf("dialing: %v", err)
 	}
 	args := &SubscribeArg{client.address, client.path, PublishService, subscribeType, topic}
 	reply := new(bool)
 	err = rpcClient.Call(RegisterService, args, reply)
 	if err != nil {
-		fmt.Errorf("Register error: %v", err)
+		log.Printf("Register error: %v", err)
 	}
 	if *reply {
 		client.eventBus.Subscribe(topic, fn)
 	}
+	rpcClient.Close()
 }
 
 //Subscribe subscribes to a topic in a remote event bus

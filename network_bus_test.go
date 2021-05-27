@@ -1,4 +1,4 @@
-package EventBus
+package gfbus
 
 import (
 	"testing"
