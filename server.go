@@ -137,14 +137,15 @@ type ServerService struct {
 // for a remote subscribe - a given client address only needs to subscribe once
 // event will be republished in local event bus
 func (service *ServerService) Register(arg *SubscribeArg, success *bool) error {
+	var err error
 	subscribers := service.server.subscribers
 	if !service.server.HasClientSubscribed(arg) {
 		rpcCallback := service.server.rpcCallback(arg)
 		switch arg.SubscribeType {
 		case Subscribe:
-			service.server.eventBus.Subscribe(arg.Topic, rpcCallback)
+			err = service.server.eventBus.Subscribe(arg.Topic, rpcCallback)
 		case SubscribeOnce:
-			service.server.eventBus.SubscribeOnce(arg.Topic, rpcCallback)
+			err = service.server.eventBus.SubscribeOnce(arg.Topic, rpcCallback)
 		}
 		var topicSubscribers []*SubscribeArg
 		if _, ok := subscribers[arg.Topic]; ok {
@@ -156,5 +157,5 @@ func (service *ServerService) Register(arg *SubscribeArg, success *bool) error {
 		subscribers[arg.Topic] = topicSubscribers
 	}
 	*success = true
-	return nil
+	return err
 }
