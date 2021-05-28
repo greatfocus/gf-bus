@@ -23,7 +23,7 @@ test-coverage: ## Run tests with coverage
 	@cat cover.out >> coverage.txt
 
 build: dep ## Build the binary file
-	@go build -i -o build/main $(PKG)
+	@go build -i -o build/gf-bus $(PKG)
  
 clean: ## Remove previous build
 	@rm -f $(PROJECT_NAME)/build
