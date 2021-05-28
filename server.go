@@ -91,16 +91,16 @@ func (server *Server) HasClientSubscribed(arg *SubscribeArg) bool {
 // Start - starts a service for remote clients to subscribe to events
 func (server *Server) Start() error {
 	var err error
+	var l net.Listener
 	service := server.service
 	if !service.started {
 		rpcServer := rpc.NewServer()
 		err = rpcServer.Register(service)
-		if err != nil {
+		if err == nil {
 			rpcServer.HandleHTTP(server.path, "/debug"+server.path)
-			l, e := net.Listen("tcp", server.address)
-			if e != nil {
-				err = e
-				log.Printf("listen error: %v", e)
+			l, err = net.Listen("tcp", server.address)
+			if err != nil {
+				log.Printf("listen error: %v", err)
 			}
 			service.started = true
 			service.wg.Add(1)
@@ -142,9 +142,9 @@ func (service *ServerService) Register(arg *SubscribeArg, success *bool) error {
 		rpcCallback := service.server.rpcCallback(arg)
 		switch arg.SubscribeType {
 		case Subscribe:
-			_ = service.server.eventBus.Subscribe(arg.Topic, rpcCallback)
+			service.server.eventBus.Subscribe(arg.Topic, rpcCallback)
 		case SubscribeOnce:
-			_ = service.server.eventBus.SubscribeOnce(arg.Topic, rpcCallback)
+			service.server.eventBus.SubscribeOnce(arg.Topic, rpcCallback)
 		}
 		var topicSubscribers []*SubscribeArg
 		if _, ok := subscribers[arg.Topic]; ok {
