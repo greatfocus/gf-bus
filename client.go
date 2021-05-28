@@ -62,9 +62,15 @@ func (client *Client) doSubscribe(topic string, fn interface{}, serverAddr, serv
 		log.Printf("Register error: %v", err)
 	}
 	if *reply {
-		client.eventBus.Subscribe(topic, fn)
+		err = client.eventBus.Subscribe(topic, fn)
+		if err != nil {
+			log.Printf("Subscribe error: %v", err)
+		}
 	}
-	rpcClient.Close()
+	err = rpcClient.Close()
+	if err != nil {
+		log.Printf("RPC Client Close error: %v", err)
+	}
 }
 
 //Subscribe subscribes to a topic in a remote event bus
@@ -84,13 +90,22 @@ func (client *Client) Start() error {
 	service := client.service
 	if !service.started {
 		server := rpc.NewServer()
-		server.Register(service)
-		server.HandleHTTP(client.path, "/debug"+client.path)
-		l, err = net.Listen("tcp", client.address)
-		if err == nil {
-			service.wg.Add(1)
-			service.started = true
-			go http.Serve(l, nil)
+		err = server.Register(service)
+		if err != nil {
+			err = errors.New("Client service register failed")
+		} else {
+			server.HandleHTTP(client.path, "/debug"+client.path)
+			l, err = net.Listen("tcp", client.address)
+			if err == nil {
+				service.wg.Add(1)
+				service.started = true
+				go func(l net.Listener) {
+					err := http.Serve(l, nil)
+					if err != nil {
+						log.Printf("Client Server failed: %v", err)
+					}
+				}(l)
+			}
 		}
 	} else {
 		err = errors.New("Client service already started")
