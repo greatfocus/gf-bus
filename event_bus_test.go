@@ -15,7 +15,7 @@ func TestNew(t *testing.T) {
 
 func TestHasCallback(t *testing.T) {
 	bus := New()
-	bus.Subscribe("topic", func() {})
+	_ = bus.Subscribe("topic", func() {})
 	if bus.HasCallback("topic_topic") {
 		t.Fail()
 	}
@@ -49,9 +49,9 @@ func TestSubscribeOnceAndManySubscribe(t *testing.T) {
 	event := "topic"
 	flag := 0
 	fn := func() { flag++ }
-	bus.SubscribeOnce(event, fn)
-	bus.Subscribe(event, fn)
-	bus.Subscribe(event, fn)
+	_ = bus.SubscribeOnce(event, fn)
+	_ = bus.Subscribe(event, fn)
+	_ = bus.Subscribe(event, fn)
 	bus.Publish(event)
 
 	if flag != 3 {
@@ -62,7 +62,7 @@ func TestSubscribeOnceAndManySubscribe(t *testing.T) {
 func TestUnsubscribe(t *testing.T) {
 	bus := New()
 	handler := func() {}
-	bus.Subscribe("topic", handler)
+	_ = bus.Subscribe("topic", handler)
 	if bus.Unsubscribe("topic", handler) != nil {
 		t.Fail()
 	}
@@ -83,7 +83,7 @@ func TestUnsubscribeMethod(t *testing.T) {
 	bus := New()
 	h := &handler{val: 0}
 
-	bus.Subscribe("topic", h.Handle)
+	_ = bus.Subscribe("topic", h.Handle)
 	bus.Publish("topic")
 	if bus.Unsubscribe("topic", h.Handle) != nil {
 		t.Fail()
@@ -101,7 +101,7 @@ func TestUnsubscribeMethod(t *testing.T) {
 
 func TestPublish(t *testing.T) {
 	bus := New()
-	bus.Subscribe("topic", func(a int, err error) {
+	_ = bus.Subscribe("topic", func(a int, err error) {
 		if a != 10 {
 			t.Fail()
 		}
@@ -117,7 +117,7 @@ func TestSubcribeOnceAsync(t *testing.T) {
 	results := make([]int, 0)
 
 	bus := New()
-	bus.SubscribeOnceAsync("topic", func(a int, out *[]int) {
+	_ = bus.SubscribeOnceAsync("topic", func(a int, out *[]int) {
 		*out = append(*out, a)
 	})
 
@@ -139,7 +139,7 @@ func TestSubscribeAsyncTransactional(t *testing.T) {
 	results := make([]int, 0)
 
 	bus := New()
-	bus.SubscribeAsync("topic", func(a int, out *[]int, dur string) {
+	_ = bus.SubscribeAsync("topic", func(a int, out *[]int, dur string) {
 		sleep, _ := time.ParseDuration(dur)
 		time.Sleep(sleep)
 		*out = append(*out, a)
@@ -163,7 +163,7 @@ func TestSubscribeAsync(t *testing.T) {
 	results := make(chan int)
 
 	bus := New()
-	bus.SubscribeAsync("topic", func(a int, out chan<- int) {
+	_ = bus.SubscribeAsync("topic", func(a int, out chan<- int) {
 		out <- a
 	}, false)
 

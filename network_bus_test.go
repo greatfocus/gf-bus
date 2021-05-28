@@ -6,7 +6,7 @@ import (
 
 func TestNewServer(t *testing.T) {
 	serverBus := NewServer(":2010", "/_server_bus_", New())
-	serverBus.Start()
+	_ = serverBus.Start()
 	if serverBus == nil || !serverBus.service.started {
 		t.Log("New server EventBus not created!")
 		t.Fail()
@@ -16,7 +16,7 @@ func TestNewServer(t *testing.T) {
 
 func TestNewClient(t *testing.T) {
 	clientBus := NewClient(":2015", "/_client_bus_", New())
-	clientBus.Start()
+	_ = clientBus.Start()
 	if clientBus == nil || !clientBus.service.started {
 		t.Log("New client EventBus not created!")
 		t.Fail()
@@ -31,7 +31,7 @@ func TestRegister(t *testing.T) {
 	args := &SubscribeArg{serverBus.address, serverPath, PublishService, Subscribe, "topic"}
 	reply := new(bool)
 
-	serverBus.service.Register(args, reply)
+	_ = serverBus.service.Register(args, reply)
 
 	if serverBus.eventBus.HasCallback("topic_topic") {
 		t.Fail()
@@ -56,8 +56,8 @@ func TestPushEvent(t *testing.T) {
 		}
 	}
 
-	clientBus.eventBus.Subscribe("topic", fn)
-	clientBus.service.PushEvent(clientArg, reply)
+	_ = clientBus.eventBus.Subscribe("topic", fn)
+	_ = clientBus.service.PushEvent(clientArg, reply)
 	if !(*reply) {
 		t.Fail()
 	}
@@ -65,7 +65,7 @@ func TestPushEvent(t *testing.T) {
 
 func TestServerPublish(t *testing.T) {
 	serverBus := NewServer(":2020", "/_server_bus_b", New())
-	serverBus.Start()
+	_ = serverBus.Start()
 
 	fn := func(a int) {
 		if a != 10 {
@@ -74,7 +74,7 @@ func TestServerPublish(t *testing.T) {
 	}
 
 	clientBus := NewClient(":2025", "/_client_bus_b", New())
-	clientBus.Start()
+	_ = clientBus.Start()
 
 	clientBus.Subscribe("topic", fn, ":2010", "/_server_bus_b")
 
@@ -86,10 +86,10 @@ func TestServerPublish(t *testing.T) {
 
 func TestNetworkBus(t *testing.T) {
 	networkBusA := NewNetworkBus(":2035", "/_net_bus_A")
-	networkBusA.Start()
+	_ = networkBusA.Start()
 
 	networkBusB := NewNetworkBus(":2030", "/_net_bus_B")
-	networkBusB.Start()
+	_ = networkBusB.Start()
 
 	fnA := func(a int) {
 		if a != 10 {

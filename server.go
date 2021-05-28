@@ -72,7 +72,7 @@ func (server *Server) rpcCallback(subscribeArg *SubscribeArg) func(args ...inter
 		if err != nil {
 			log.Printf("dialing: %v", err)
 		}
-		client.Close()
+		_ = client.Close()
 	}
 }
 
@@ -94,16 +94,23 @@ func (server *Server) Start() error {
 	service := server.service
 	if !service.started {
 		rpcServer := rpc.NewServer()
-		rpcServer.Register(service)
-		rpcServer.HandleHTTP(server.path, "/debug"+server.path)
-		l, e := net.Listen("tcp", server.address)
-		if e != nil {
-			err = e
-			log.Printf("listen error: %v", e)
+		err = rpcServer.Register(service)
+		if err != nil {
+			rpcServer.HandleHTTP(server.path, "/debug"+server.path)
+			l, e := net.Listen("tcp", server.address)
+			if e != nil {
+				err = e
+				log.Printf("listen error: %v", e)
+			}
+			service.started = true
+			service.wg.Add(1)
+			go func(l net.Listener) {
+				err = http.Serve(l, nil)
+				log.Printf("listen error: %v", err)
+			}(l)
+		} else {
+			log.Printf("listen error: %v", err)
 		}
-		service.started = true
-		service.wg.Add(1)
-		go http.Serve(l, nil)
 	} else {
 		err = errors.New("Server bus already started")
 	}
@@ -135,9 +142,9 @@ func (service *ServerService) Register(arg *SubscribeArg, success *bool) error {
 		rpcCallback := service.server.rpcCallback(arg)
 		switch arg.SubscribeType {
 		case Subscribe:
-			service.server.eventBus.Subscribe(arg.Topic, rpcCallback)
+			_ = service.server.eventBus.Subscribe(arg.Topic, rpcCallback)
 		case SubscribeOnce:
-			service.server.eventBus.SubscribeOnce(arg.Topic, rpcCallback)
+			_ = service.server.eventBus.SubscribeOnce(arg.Topic, rpcCallback)
 		}
 		var topicSubscribers []*SubscribeArg
 		if _, ok := subscribers[arg.Topic]; ok {

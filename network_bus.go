@@ -45,21 +45,27 @@ type NetworkBusService struct {
 
 // Start - helper method to serve a network bus service
 func (networkBus *NetworkBus) Start() error {
-	var err error
+	var err, clientErr, serverErr error
 	service := networkBus.service
 	clientService := networkBus.Client.service
 	serverService := networkBus.Server.service
 	if !service.started {
 		server := rpc.NewServer()
-		server.RegisterName("ServerService", serverService)
-		server.RegisterName("ClientService", clientService)
-		server.HandleHTTP(networkBus.path, "/debug"+networkBus.path)
-		l, e := net.Listen("tcp", networkBus.address)
-		if e != nil {
-			err = fmt.Errorf("listen error: %v", e)
+		clientErr = server.RegisterName("ServerService", serverService)
+		serverErr = server.RegisterName("ClientService", clientService)
+		if serverErr == nil && clientErr == nil {
+			server.HandleHTTP(networkBus.path, "/debug"+networkBus.path)
+			l, err := net.Listen("tcp", networkBus.address)
+			if err != nil {
+				_ = fmt.Errorf("listen error: %v", err)
+			}
+			service.wg.Add(1)
+			go func(l net.Listener) {
+				err = http.Serve(l, nil)
+			}(l)
+		} else {
+			err = clientErr
 		}
-		service.wg.Add(1)
-		go http.Serve(l, nil)
 	} else {
 		err = errors.New("Server bus already started")
 	}

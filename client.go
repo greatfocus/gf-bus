@@ -2,7 +2,6 @@ package gfbus
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -47,7 +46,7 @@ func (client *Client) EventBus() Bus {
 func (client *Client) doSubscribe(topic string, fn interface{}, serverAddr, serverPath string, subscribeType SubscribeType) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Server not found -", r)
+			log.Println("Server not found -", r)
 		}
 	}()
 
