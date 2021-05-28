@@ -100,7 +100,7 @@ func (client *Client) Start() error {
 				service.wg.Add(1)
 				service.started = true
 				go func(l net.Listener) {
-					err := http.Serve(l, nil)
+					err = http.Serve(l, nil)
 					if err != nil {
 						log.Printf("Client Server failed: %v", err)
 					}
