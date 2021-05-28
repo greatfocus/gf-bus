@@ -46,6 +46,7 @@ type NetworkBusService struct {
 // Start - helper method to serve a network bus service
 func (networkBus *NetworkBus) Start() error {
 	var err, clientErr, serverErr error
+	var l net.Listener
 	service := networkBus.service
 	clientService := networkBus.Client.service
 	serverService := networkBus.Server.service
@@ -55,7 +56,7 @@ func (networkBus *NetworkBus) Start() error {
 		serverErr = server.RegisterName("ClientService", clientService)
 		if serverErr == nil && clientErr == nil {
 			server.HandleHTTP(networkBus.path, "/debug"+networkBus.path)
-			l, err := net.Listen("tcp", networkBus.address)
+			l, err = net.Listen("tcp", networkBus.address)
 			if err != nil {
 				_ = fmt.Errorf("listen error: %v", err)
 			}
